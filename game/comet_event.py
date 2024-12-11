@@ -65,15 +65,6 @@ class CometFallEvent:
         elif self.is_full_loaded() and len(self.game.all_monsters) > 0:
             print("Barre pleine, mais des monstres restent.")
 
-
-
-
-
-
-
-
-
-
     def update_bar(self, surface):
 
         # ajouter du pourcentage à la barre
