@@ -74,7 +74,8 @@ class Game:
 
         # Appeler la méthode de mise à jour des comètes
         if self.comet_event.fall_mode:
-            self.comet_event.update_comets()
+            self.comet_event.update_comets()  # Générer les comètes progressivement
+
 
 
 

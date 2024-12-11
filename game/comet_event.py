@@ -22,10 +22,28 @@ class CometFallEvent:
 
     def reset_percent(self):
         self.percent = 0
+        self.comets_spawned = 0  # Réinitialiser le compteur
+        self.total_comets = 20  # Réinitialiser la limite totale
+
        
+    def update_comets(self):
+        # Vérifier si on doit générer une nouvelle comète
+        if self.comets_spawned < self.total_comets:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.spawn_delay > 500:  # Délai entre les spawns (500ms)
+                # Ajouter une nouvelle comète
+                self.all_comets.add(Comet(self))
+                self.comets_spawned += 1
+                self.spawn_delay = current_time
+                print(f"Comète générée ({self.comets_spawned}/{self.total_comets})")
 
 
     def meteor_fall(self):
+        self.total_comets = 20  # Nombre total de comètes à générer
+        self.comets_spawned = 0  # Compteur pour suivre le nombre de comètes générées
+        self.spawn_delay = pygame.time.get_ticks()  # Timer pour gérer le délai entre chaque comète
+        print("Météorites prêtes à tomber !")
+        
         # Fixer une limite totale de météorites à générer
         for i in range(1, 15):
             
