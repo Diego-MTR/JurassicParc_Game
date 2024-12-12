@@ -1,5 +1,6 @@
 import pygame
 import random
+from sounds import SoundManager
 
 # creer une classe pour gérer cette comete
 class Comet(pygame.sprite.Sprite):

@@ -25,6 +25,7 @@ banner_rect = banner.get_rect()
 banner_rect.x = math.ceil(screen.get_width() / 4)
 banner_rect.y = math.ceil(screen.get_height() / 8)
 
+
 # import charger notre bouton pour lancer la partie
 play_button = pygame.image.load('Assets/button.png')
 play_button = pygame.transform.scale(play_button, (400, 150))
@@ -100,3 +101,4 @@ while running:
                 game.sound_manager.play('click')
     # fixer le nombre de fps sur ma clock
     clock.tick(FPS)
+

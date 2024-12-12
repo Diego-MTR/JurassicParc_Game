@@ -13,7 +13,9 @@ class Game:
         self.is_playing = False
         self.spawn_timer = 0  # Ajout d'un timer pour gérer les spawns
         self.spawn_interval = 3000  # Intervalle en millisecondes entre chaque spawn
-        self.is_comet_event_active = False 
+        self.is_comet_event_active = False
+        self.difficulty_level = 1  # Niveau de difficulté initial
+ 
         # generer notre joueur
         self.all_players = pygame.sprite.Group()
         self.player = Player(self)
@@ -29,6 +31,17 @@ class Game:
         self.font = pygame.font.Font("Assets/my_custom_font.ttf", 25)
         self.score = 0
         self.pressed = {}
+        
+        
+        # Charger les images pour la fenêtre de défaite
+        self.defeat_image = pygame.image.load("Assets/defeat.png")
+        self.defeat_image = pygame.transform.scale(self.defeat_image, (400, 200))
+        self.defeat_rect = self.defeat_image.get_rect(center=(540, 200))
+
+        self.retry_button = pygame.image.load("Assets/retry.png")
+        self.retry_button = pygame.transform.scale(self.retry_button, (200, 100))
+        self.retry_rect = self.retry_button.get_rect(center=(540, 400))
+
 
     def start(self):
         self.is_playing = True
@@ -40,18 +53,22 @@ class Game:
         self.score += points
 
     def game_over(self):
-        # Remettre le jeu à neuf
+        """Affiche l'écran de défaite."""
+        self.is_playing = False
         self.all_monsters = pygame.sprite.Group()
         self.comet_event.all_comets = pygame.sprite.Group()
         self.player.health = self.player.max_health
         self.comet_event.reset_percent()
-        self.is_comet_event_active = False  # Réinitialiser l'événement météorite
-        self.is_playing = False
-        self.score = 0
-        self.monsters_killed = 0  # Réinitialiser les monstres tués
-        self.spawn_timer = 0  # Réinitialiser le timer de spawn
-        # Jouer le son
-        self.sound_manager.play("game_over")
+        self.is_comet_event_active = False
+        self.spawn_timer = 0
+
+    def handle_defeat_screen(self, screen, event):
+        """Gère l'affichage et les interactions sur l'écran de défaite."""
+        screen.blit(self.defeat_image, self.defeat_rect)
+        screen.blit(self.retry_button, self.retry_rect)
+        if event.type == pygame.MOUSEBUTTONDOWN and self.retry_rect.collidepoint(event.pos):
+            self.start()  # Relancer le jeu
+
 
     def update(self, screen):
         if self.is_playing:
@@ -110,3 +127,19 @@ class Game:
     def get_random_monster(self):
         import random
         return random.choice([Alanqa, Baryonyx, Carnotaurus, Oviraptor, Styracosaurus])
+
+    def increase_difficulty(self):
+        """Augmente le niveau de difficulté."""
+        self.difficulty_level += 1
+        print(f"Niveau de difficulté augmenté : {self.difficulty_level}")
+
+        # Augmenter la difficulté des météorites
+        self.comet_event.total_comets += 5
+        self.comet_event.percent_speed -= 1  # Barre de progression plus lente
+
+        # Ajuster les monstres
+        for monster in self.all_monsters:
+            monster.max_health += 20 * self.difficulty_level  # Plus de santé
+            monster.health = monster.max_health
+            monster.velocity += 0.1 * self.difficulty_level  # Plus rapide
+            self.all_monsters += 3
