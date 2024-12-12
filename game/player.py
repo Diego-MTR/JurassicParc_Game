@@ -39,6 +39,7 @@ class Player(animation.AnimateSprite):
 
     def launch_projectile(self):
         # creer une nouvelle instance de la classe projectile
+       
         self.all_projectiles.add(Projectile(self))
         # demarrer l'anim du lancer
         self.start_animations()

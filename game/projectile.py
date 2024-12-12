@@ -18,7 +18,7 @@ class Projectile(pygame.sprite.Sprite):
 
     def rotate(self):
         # tourner le projectile
-        self.angle += 8
+        self.angle += 6
         self.image =pygame.transform.rotozoom(self.origin_image, self.angle, 1)
         self.rect = self.image.get_rect(center=self.rect.center)
 

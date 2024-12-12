@@ -6,8 +6,9 @@ import animation
 # creer une classe qui va gérer la notion de monstre sur notre jeu
 class Monster(animation.AnimateSprite):
 
-    def __init__(self, game, name, size=(50, 50), loot_amount=10):
-        super().__init__(name, size=size)  # Appeler le constructeur d'AnimateSprite
+    def __init__(self, game, name, size=(50, 50), loot_amount=10): 
+        super().__init__(name, size=size)   # Appeler le constructeur d'AnimateSprite
+        self.start_animations()
         self.game = game
         self.health = 100
         self.max_health = 100
@@ -78,7 +79,7 @@ class Alanqa(Monster):
 
     def __init__(self, game):
         super().__init__(game, "alanqa", (130, 130))
-        self.set_speed(2)
+        self.set_speed(4)
         self.set_loot_amount(20)
         self.rect.y = 550  # Ajustement pour descendre Alanqa
 
@@ -87,19 +88,19 @@ class Baryonyx(Monster):
 
     def __init__(self, game):
         super().__init__(game, "baryonyx", (300, 300), 130)
-        self.health = 250
-        self.max_health = 250
-        self.attack = 0.2
+        self.health = 120
+        self.max_health = 120
+        self.attack = 0.5
         self.set_speed(1)
-        self.set_loot_amount(80)
+        self.set_loot_amount(50)
 
 # definir une classe pour Carnotaurus
 class Carnotaurus(Monster):
 
     def __init__(self, game):
         super().__init__(game, "carnotaurus", (300, 300), 130)
-        self.health = 250
-        self.max_health = 250
+        self.health = 100
+        self.max_health = 100
         self.attack = 0.2
         self.set_speed(1)
         self.set_loot_amount(80)
@@ -108,12 +109,12 @@ class Carnotaurus(Monster):
 class Oviraptor(Monster):
 
     def __init__(self, game):
-        super().__init__(game, "oviraptor", (300, 300), 130)
-        self.health = 250
-        self.max_health = 250
-        self.attack = 0.2
+        super().__init__(game, "oviraptor", (400, 300), 130)
+        self.health = 150
+        self.max_health = 150
+        self.attack = 0.3
         self.set_speed(1)
-        self.set_loot_amount(80)
+        self.set_loot_amount(150)
         
 # definir une classe pour de Styracosaurus
 class Styracosaurus(Monster):
@@ -123,8 +124,8 @@ class Styracosaurus(Monster):
         self.max_health = 250
         self.attack = 0.2
         self.set_speed(0.3)  # Rendre le déplacement plus lent
-        self.animation_speed = 20  # Animation plus lente
-        self.set_loot_amount(80)
+        self.animation_speed = 30  # Animation plus lente
+        self.set_loot_amount(200)
 
 
 
