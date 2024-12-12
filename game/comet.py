@@ -1,6 +1,6 @@
 import pygame
 import random
-from sounds import SoundManager
+
 
 # creer une classe pour gérer cette comete
 class Comet(pygame.sprite.Sprite):
@@ -14,17 +14,20 @@ class Comet(pygame.sprite.Sprite):
         self.rect.y = -random.randint(50, 150)  # Commence juste au-dessus de l'écran
         self.comet_event = comet_event
         # gerer le son
-        self.sound_manager = SoundManager()
+        
 
     def fall(self):
         """Gère la chute de la comète."""
         self.rect.y += self.velocity
 
         # Si la comète atteint le sol
+        self.sound_played = False  # Ajouter dans __init__
+
         if self.rect.y >= 550:
             print(f"Comète au sol à x={self.rect.x}, y={self.rect.y}")
-            self.sound_manager.play("meteorite")
             self.remove()
+
+
 
         # Si la comète touche le joueur
         if self.comet_event.game.check_collision(self, self.comet_event.game.all_players):

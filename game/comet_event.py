@@ -10,7 +10,7 @@ class CometFallEvent:
         self.game = game
         self.fall_mode = False
         self.all_comets = pygame.sprite.Group()
-        self.total_comets = 20
+        self.total_comets = 10
         self.comets_spawned = 0
         self.last_spawn_time = pygame.time.get_ticks()
 
@@ -41,7 +41,7 @@ class CometFallEvent:
             return
 
         current_time = pygame.time.get_ticks()
-        spawn_interval = 2000  # 2 secondes
+        spawn_interval = 5000  # 3 secondes
 
         # Générer une nouvelle comète toutes les 2 secondes
         if current_time - self.last_spawn_time > spawn_interval and self.comets_spawned < self.total_comets:
@@ -55,7 +55,7 @@ class CometFallEvent:
             self.last_spawn_time = current_time
 
         # Mettre à jour chaque comète
-        for comet in self.all_comets:
+        for comet in list(self.all_comets)[:10]:  # Traiter seulement 10 comètes maximum par cycle
             comet.fall()
 
         # Terminer l'événement si toutes les comètes sont tombées

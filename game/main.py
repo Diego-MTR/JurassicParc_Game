@@ -41,30 +41,39 @@ game = Game()
 running = True
 
 # boucle tant que cette condition est vrai
+# boucle tant que cette condition est vraie
 while running:
 
-    # appliquer l'arrière plan de notre jeu
+    # appliquer l'arrière-plan de notre jeu
     screen.blit(background, (0, 0))
 
-    # verifier si notre jeu a commencé ou non
+    # vérifier si le jeu est en cours
     if game.is_playing:
-        # declencher les instructions de la partie
+        # déclencher les instructions de la partie
         game.update(screen)
-    # verifier si notre jeu n'a pas commencé
-    # Vérifiez si le jeu n'a pas commencé
-    if not game.is_playing:
+
+    # vérifier si le joueur a perdu (Game Over)
+    elif not game.is_playing and game.player.health <= 0:  # Afficher Game Over si le joueur est mort
+        # Ajouter l'image de Game Over
+        screen.blit(gameover_img, (0, 0))
+
+        # Afficher le score final
+        final_score = game.font.render(f"Score: {game.score}", True, (255, 255, 255))
+        screen.blit(final_score, (screen.get_width() / 2 - final_score.get_width() / 2, 300))
+
+        # Ajouter le bouton retry
+        screen.blit(retry_button, retry_button_rect)
+
+    # vérifier si le jeu n'a pas commencé (écran d'accueil)
+    elif not game.is_playing:
         # Ajouter mon écran de bienvenue
         screen.blit(banner, banner_rect)
         screen.blit(play_button, play_button_rect)
 
-
-
-
-
     # mettre à jour l'écran
     pygame.display.flip()
 
-    # si le joueur ferme cette fenetre
+    # gérer les événements
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -86,17 +95,21 @@ while running:
                     game.start()
                     game.sound_manager.play('click')
 
-
         elif event.type == pygame.KEYUP:
             game.pressed[event.key] = False
 
-
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # verification pour savoir si la souris est en collision avec le bouton jouer
-            if play_button_rect.collidepoint(event.pos):
-                # mettre le jeu en mode "lancé"
+            # vérification pour savoir si la souris est en collision avec le bouton jouer
+            if play_button_rect.collidepoint(event.pos) and not game.is_playing:
                 game.start()
-                # jouer le son
                 game.sound_manager.play('click')
-    # fixer le nombre de fps sur ma clock...
+
+            # vérification pour le bouton retry
+            elif retry_button_rect.collidepoint(event.pos) and game.player.health <= 0:
+                game.player.health = game.player.max_health  # Réinitialiser la santé
+                game.start()  # Redémarrer le jeu
+                game.sound_manager.play('click')
+
+    # fixer le nombre de fps sur ma clock
     clock.tick(FPS)
+
