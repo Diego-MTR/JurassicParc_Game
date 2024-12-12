@@ -69,6 +69,7 @@ class CometFallEvent:
         self.fall_mode = False
         self.reset_percent()
         self.game.is_comet_event_active = False
+        self.game.start()
 
     def attempt_fall(self):
         """Déclenche l'événement météorite si la barre est pleine."""

@@ -67,7 +67,8 @@ class Game:
             screen.blit(self.player.image, self.player.rect)
             self.player.update_health_bar(screen)
             self.player.update_animation()
-
+            
+            
             # Gestion des mouvements
             if self.pressed.get(pygame.K_RIGHT) and self.player.rect.x + self.player.rect.width < screen.get_width():
                 self.player.move_right()
