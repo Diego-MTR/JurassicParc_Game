@@ -3,69 +3,93 @@ import math
 from game import Game
 pygame.init()
 
-# definir une clock
+# définir une clock
 clock = pygame.time.Clock()
 FPS = 60
 
-
-
-# generer la fenetre de notre jeu
+# générer la fenêtre de notre jeu
 pygame.display.set_caption("Jurassic Park")
 screen = pygame.display.set_mode((1080, 720))
 
-# importer de charger l'arrière plan de notre jeu
+# importer et charger l'arrière-plan de notre jeu
 background = pygame.image.load('Assets/bg.jpg')
-# Redimensionne l'image à la taille de l'écran
-background = pygame.transform.scale(background, screen.get_size())  
+background = pygame.transform.scale(background, screen.get_size())
 
-# importer charger notre bannière
-banner = pygame.image.load('Assets/banner.png')
-banner = pygame.transform.scale(banner, (525, 350))
-banner_rect = banner.get_rect()
+# importer et charger les bannières et boutons
+banner_start = pygame.image.load('Assets/banner.png')
+banner_start = pygame.transform.scale(banner_start, (525, 350))
+
+banner_defeat = pygame.image.load('Assets/defeat.png')
+banner_defeat = pygame.transform.scale(banner_defeat, (525, 350))
+
+play_button_start = pygame.image.load('Assets/button.png')
+play_button_start = pygame.transform.scale(play_button_start, (400, 150))
+
+play_button_retry = pygame.image.load('Assets/retry.png')
+play_button_retry = pygame.transform.scale(play_button_retry, (400, 150))
+
+banner_rect = banner_start.get_rect()
 banner_rect.x = math.ceil(screen.get_width() / 4)
 banner_rect.y = math.ceil(screen.get_height() / 8)
 
-
-# import charger notre bouton pour lancer la partie
-play_button = pygame.image.load('Assets/button.png')
-play_button = pygame.transform.scale(play_button, (400, 150))
-play_button_rect = play_button.get_rect()
+play_button_rect = play_button_start.get_rect()
 play_button_rect.x = math.ceil(screen.get_width() / 3.33)
 play_button_rect.y = math.ceil(screen.get_height() / 2)
 
-
-
-
 # charger notre jeu
 game = Game()
+if not hasattr(game, 'is_game_over'):
+    game.is_game_over = False  # Assurer l'initialisation correcte
+
+# Gestion des sons
+sound_manager = game.sound_manager
+sound_manager.play('welcome')  # Jouer la musique d'accueil
+# Définir un indicateur pour la première fois
+first_time = True
 
 running = True
 
-# boucle tant que cette condition est vrai
+# boucle principale
 while running:
-
-    # appliquer l'arrière plan de notre jeu
     screen.blit(background, (0, 0))
 
-    # verifier si notre jeu a commencé ou non
     if game.is_playing:
-        # declencher les instructions de la partie
+        sound_manager.stop('welcome')
         game.update(screen)
-    # verifier si notre jeu n'a pas commencé
-    # Vérifiez si le jeu n'a pas commencé
-    if not game.is_playing:
-        # Ajouter mon écran de bienvenue
-        screen.blit(banner, banner_rect)
-        screen.blit(play_button, play_button_rect)
+    else:
+        if first_time:
+            # Afficher l'écran de démarrage
+            screen.blit(banner_start, banner_rect)
+            screen.blit(play_button_start, play_button_rect)
+        elif game.is_game_over:
+            # Afficher l'écran de défaite
+            screen.blit(banner_defeat, banner_rect)
+            screen.blit(play_button_retry, play_button_rect)
 
+            # Ajouter les statistiques
+            font = pygame.font.Font(None, 30)
+            stats_text = f"""
+            Score : {game.stats['score']}
+            Manches complétées : {game.stats['rounds_completed']}
+            Dinosaures tués :
+              Alanqa : {game.stats['dinosaurs_killed']['alanqa']}
+              Baryonyx : {game.stats['dinosaurs_killed']['baryonyx']}
+              Carnotaurus : {game.stats['dinosaurs_killed']['carnotaurus']}
+              Oviraptor : {game.stats['dinosaurs_killed']['oviraptor']}
+              Styracosaurus : {game.stats['dinosaurs_killed']['styracosaurus']}
+            Dégâts infligés : {game.stats['damage_dealt']}
+            Dégâts reçus : {game.stats['damage_received']}
+            Comètes reçues : {game.stats['comets_received']}
+            """
+            y = 250
+            for line in stats_text.splitlines():
+                text = font.render(line.strip(), True, (255, 255, 255))
+                screen.blit(text, (50, y))
+                y += 25
 
-
-
-
-    # mettre à jour l'écran
     pygame.display.flip()
 
-    # si le joueur ferme cette fenetre
+    # gestion des événements
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -74,31 +98,52 @@ while running:
 
         elif event.type == pygame.KEYDOWN:
             game.pressed[event.key] = True
-
-            # Détecter si la flèche du haut est pressée pour sauter
-            if event.key == pygame.K_UP and game.is_playing:
-                game.player.jump()
-
-            # Espace pour tirer un projectile
-            if event.key == pygame.K_SPACE:
-                if game.is_playing:
+            if game.is_playing:
+                if event.key == pygame.K_UP:
+                    game.player.jump()
+                elif event.key == pygame.K_SPACE:
                     game.player.launch_projectile()
-                else:
-                    game.start()
-                    game.sound_manager.play('click')
-
 
         elif event.type == pygame.KEYUP:
             game.pressed[event.key] = False
 
-
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # verification pour savoir si la souris est en collision avec le bouton jouer
-            if play_button_rect.collidepoint(event.pos):
-                # mettre le jeu en mode "lancé"
+            if first_time and play_button_rect.collidepoint(event.pos):
+                # Premier lancement
+                first_time = False
                 game.start()
-                # jouer le son
+                sound_manager.play('click')
+                sound_manager.stop('welcome')
+            elif game.is_game_over and play_button_retry.get_rect(center=(540, 400)).collidepoint(event.pos):
+                # Exporter les statistiques et réinitialiser le jeu
+                first_time = False
+                game.is_game_over = False
+                game.score = 0
+                game.player.health = game.player.max_health
+                game.all_monsters.empty()
+                game.comet_event.reset_percent()
+                game.start()
                 game.sound_manager.play('click')
-    # fixer le nombre de fps sur ma clock
+
+    # Gestion des mouvements en continu (gauche/droite)
+    if game.is_playing:
+        if game.pressed.get(pygame.K_RIGHT) and game.player.rect.x + game.player.rect.width < screen.get_width():
+            game.player.move_right()
+        elif game.pressed.get(pygame.K_LEFT) and game.player.rect.x > 0:
+            game.player.move_left()
+
     clock.tick(FPS)
 
+# Ajouter la méthode export_stats à la classe Game
+if not hasattr(Game, 'export_stats'):
+    def export_stats(self):
+        with open("game_stats.txt", "w") as file:
+            file.write("Statistiques du jeu :\n")
+            file.write(f"Score : {self.stats['score']}\n")
+            file.write(f"Manches complétées : {self.stats['rounds_completed']}\n")
+            file.write("Dinosaures tués :\n")
+            for dino, count in self.stats['dinosaurs_killed'].items():
+                file.write(f"  {dino}: {count}\n")
+            file.write(f"Dégâts infligés : {self.stats['damage_dealt']}\n")
+            file.write(f"Comètes reçues : {self.stats['comets_received']}\n")
+    Game.export_stats = export_stats

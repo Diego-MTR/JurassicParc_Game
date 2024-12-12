@@ -10,7 +10,7 @@ class Player(animation.AnimateSprite):
         self.game = game
         self.health = 100
         self.max_health = 100
-        self.attack = 10
+        self.attack = 30
         self.velocity = 3
         self.jump_velocity = 20  # Puissance du saut
         self.gravity = 2  # Gravité appliquée
@@ -21,13 +21,14 @@ class Player(animation.AnimateSprite):
         self.rect = self.image.get_rect()
         self.rect.x = 400
         self.rect.y = self.ground_level
+        self.last_shot_time = 0  # Temps du dernier tir
+        self.cooldown_time = 600  # Temps de recharge en millisecondes (1 seconde)
 
     def damage(self, amount):
-        if self.health - amount > amount:
-            self.health -= amount
-        else:
-            # si le joueur n'a plus de points de vie
+        self.health -= amount
+        if self.health <= 0:
             self.game.game_over()
+
 
     def update_animation(self):
         self.animate()
@@ -38,12 +39,18 @@ class Player(animation.AnimateSprite):
         pygame.draw.rect(surface, (111, 210, 46), [self.rect.x + 50, self.rect.y + 20, self.health, 7])
 
     def launch_projectile(self):
-        # creer une nouvelle instance de la classe projectile
-        self.all_projectiles.add(Projectile(self))
-        # demarrer l'anim du lancer
-        self.start_animations()
-        # jouer le son
-        self.game.sound_manager.play('tir')
+        current_time = pygame.time.get_ticks()  # Temps actuel en millisecondes
+        if current_time - self.last_shot_time >= self.cooldown_time:
+            # Créer une nouvelle instance de la classe projectile
+            self.all_projectiles.add(Projectile(self))
+            # Démarrer l'animation du lancer
+            self.start_animations()
+            # Jouer le son
+            self.game.sound_manager.play('tir')
+            # Enregistrer le temps du tir
+            self.last_shot_time = current_time
+        else:
+            print("L'arme est en recharge.")  # Debug facultatif
 
     def jump(self):
         if not self.is_jumping:  # Empêche le double saut
