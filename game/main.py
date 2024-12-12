@@ -98,5 +98,5 @@ while running:
                 game.start()
                 # jouer le son
                 game.sound_manager.play('click')
-    # fixer le nombre de fps sur ma clock
+    # fixer le nombre de fps sur ma clock...
     clock.tick(FPS)
