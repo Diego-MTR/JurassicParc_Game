@@ -9,7 +9,7 @@ class Comet(pygame.sprite.Sprite):
         self.image = pygame.image.load('Assets/comet.png')
         self.image = pygame.transform.scale(self.image, (150, 150))  # Taille par défaut
         self.rect = self.image.get_rect()
-        self.velocity = random.randint(1, 3)
+        self.velocity = random.randint(4, 8)
         self.rect.x = random.randint(20, 800)  # Position horizontale aléatoire
         self.rect.y = -random.randint(50, 150)  # Commence juste au-dessus de l'écran
         self.comet_event = comet_event
@@ -33,7 +33,7 @@ class Comet(pygame.sprite.Sprite):
         if self.comet_event.game.check_collision(self, self.comet_event.game.all_players):
             print(f"Comète a touché le joueur à x={self.rect.x}, y={self.rect.y}")
             self.remove()
-            self.comet_event.game.player.damage(10)
+            self.comet_event.game.player.damage(20)
 
         print(f"Comète en chute : x={self.rect.x}, y={self.rect.y}")
 

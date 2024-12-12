@@ -52,18 +52,6 @@ while running:
         # déclencher les instructions de la partie
         game.update(screen)
 
-    # vérifier si le joueur a perdu (Game Over)
-    elif not game.is_playing and game.player.health <= 0:  # Afficher Game Over si le joueur est mort
-        # Ajouter l'image de Game Over
-        screen.blit(gameover_img, (0, 0))
-
-        # Afficher le score final
-        final_score = game.font.render(f"Score: {game.score}", True, (255, 255, 255))
-        screen.blit(final_score, (screen.get_width() / 2 - final_score.get_width() / 2, 300))
-
-        # Ajouter le bouton retry
-        screen.blit(retry_button, retry_button_rect)
-
     # vérifier si le jeu n'a pas commencé (écran d'accueil)
     elif not game.is_playing:
         # Ajouter mon écran de bienvenue

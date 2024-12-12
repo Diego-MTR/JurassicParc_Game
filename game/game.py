@@ -34,7 +34,15 @@ class Game:
         self.is_playing = True
         self.monsters_killed = 0  # Réinitialiser le compteur
         self.spawn_timer = pygame.time.get_ticks()  # Initialiser le timer
+        a = True
+        if a:
+             self.spawn_monster(self.get_random_monster())
+             self.spawn_monster(self.get_random_monster())
+             a = False
+        
         self.spawn_monster(self.get_random_monster())
+
+
         self.sound_manager.play('jurassicpark')  # Faire apparaître le premier monstre
 
     def add_score(self, points=10):
@@ -59,6 +67,7 @@ class Game:
     def update(self, screen):
         if self.is_playing:
             # Gestion des comètes
+        
             if self.comet_event.fall_mode:
                 self.comet_event.update_comets()
 

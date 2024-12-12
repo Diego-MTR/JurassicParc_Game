@@ -6,11 +6,11 @@ class CometFallEvent:
 
     def __init__(self, game):
         self.percent = 0
-        self.percent_speed = 5
+        self.percent_speed = 7
         self.game = game
         self.fall_mode = False
         self.all_comets = pygame.sprite.Group()
-        self.total_comets = 10
+        self.total_comets = 20
         self.comets_spawned = 0
         self.last_spawn_time = pygame.time.get_ticks()
 

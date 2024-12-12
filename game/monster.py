@@ -13,7 +13,7 @@ class Monster(animation.AnimateSprite):
         self.health = 100
         self.max_health = 100
         self.attack = 10
-        self.velocity = 1
+        self.velocity = 0
         self.loot_amount = loot_amount  # Montant du loot
         self.rect = self.image.get_rect()
         self.rect.x = 1000 + random.randint(0, 300)
@@ -79,9 +79,9 @@ class Alanqa(Monster):
 
     def __init__(self, game):
         super().__init__(game, "alanqa", (130, 130))
-        self.set_speed(4)
+        self.set_speed(3)
         self.set_loot_amount(20)
-        self.rect.y = 550  # Ajustement pour descendre Alanqa
+        self.rect.y = 450  # Ajustement pour descendre Alanqa
 
 # definir une classe pour le Baryonyx
 class Baryonyx(Monster):
@@ -90,8 +90,8 @@ class Baryonyx(Monster):
         super().__init__(game, "baryonyx", (300, 300), 130)
         self.health = 120
         self.max_health = 120
-        self.attack = 0.5
-        self.set_speed(1)
+        self.attack = 0.3
+        self.set_speed(0.2)
         self.set_loot_amount(50)
 
 # definir une classe pour Carnotaurus
@@ -102,7 +102,7 @@ class Carnotaurus(Monster):
         self.health = 100
         self.max_health = 100
         self.attack = 0.2
-        self.set_speed(1)
+        self.set_speed(0.2)
         self.set_loot_amount(80)
         
 # definir une classe pour Oviraptor
@@ -113,18 +113,17 @@ class Oviraptor(Monster):
         self.health = 150
         self.max_health = 150
         self.attack = 0.3
-        self.set_speed(1)
+        self.set_speed(0.2)
         self.set_loot_amount(150)
         
 # definir une classe pour de Styracosaurus
 class Styracosaurus(Monster):
     def __init__(self, game):
         super().__init__(game, "styracosaurus", (300, 300), 130)
-        self.health = 250
-        self.max_health = 250
-        self.attack = 0.2
-        self.set_speed(0.3)  # Rendre le déplacement plus lent
-        self.animation_speed = 30  # Animation plus lente
+        self.health = 200
+        self.max_health = 200
+        self.attack = 0.1
+        self.set_speed(0.1)  # Rendre le déplacement plus lent
         self.set_loot_amount(200)
 
 
