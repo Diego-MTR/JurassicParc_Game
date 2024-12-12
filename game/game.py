@@ -34,7 +34,8 @@ class Game:
         self.is_playing = True
         self.monsters_killed = 0  # Réinitialiser le compteur
         self.spawn_timer = pygame.time.get_ticks()  # Initialiser le timer
-        self.spawn_monster(self.get_random_monster())  # Faire apparaître le premier monstre
+        self.spawn_monster(self.get_random_monster())
+        self.sound_manager.play('jurassicpark')  # Faire apparaître le premier monstre
 
     def add_score(self, points=10):
         self.score += points
@@ -52,6 +53,8 @@ class Game:
         self.spawn_timer = 0  # Réinitialiser le timer de spawn
         # Jouer le son
         self.sound_manager.play("game_over")
+
+        self.sound_manager.sounds['jurassicpark'].stop()
 
     def update(self, screen):
         if self.is_playing:
