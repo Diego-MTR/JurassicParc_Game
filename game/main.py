@@ -92,12 +92,7 @@ while running:
                 game.start()
                 game.sound_manager.play('click')
 
-            # vérification pour le bouton retry
-            elif retry_button_rect.collidepoint(event.pos) and game.player.health <= 0:
-                game.player.health = game.player.max_health  # Réinitialiser la santé
-                game.start()  # Redémarrer le jeu
-                game.sound_manager.play('click')
-
+        
     # fixer le nombre de fps sur ma clock
     clock.tick(FPS)
 

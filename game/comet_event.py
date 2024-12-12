@@ -6,7 +6,7 @@ class CometFallEvent:
 
     def __init__(self, game):
         self.percent = 0
-        self.percent_speed = 7
+        self.percent_speed = 6
         self.game = game
         self.fall_mode = False
         self.all_comets = pygame.sprite.Group()
@@ -41,11 +41,11 @@ class CometFallEvent:
             return
 
         current_time = pygame.time.get_ticks()
-        spawn_interval = 5000  # 3 secondes
+        spawn_interval = 2000  # 2 secondes
 
         # Générer une nouvelle comète toutes les 2 secondes
         if current_time - self.last_spawn_time > spawn_interval and self.comets_spawned < self.total_comets:
-            num_comets = random.randint(1, 3)  # Générer 1 à 3 comètes
+            num_comets = random.randint(3, 5)  # Générer 4 à 6 comètes
             for _ in range(num_comets):
                 if self.comets_spawned < self.total_comets:
                     comet = Comet(self)
