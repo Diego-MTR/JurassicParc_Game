@@ -83,7 +83,8 @@ class Alanqa(Monster):
 
     def __init__(self, game):
         super().__init__(game, "alanqa", (130, 130))
-        self.set_speed(3)
+        self.set_speed(1)
+        self.attack = 0.3
         self.set_loot_amount(20)
         self.rect.y = 450  # Ajustement pour descendre Alanqa
 

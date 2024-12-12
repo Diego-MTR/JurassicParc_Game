@@ -11,7 +11,7 @@ class Projectile(pygame.sprite.Sprite):
         self.image = pygame.image.load('Assets/projectile.png')
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
-        self.rect.x = player.rect.x + 120
+        self.rect.x = player.rect.x + 175
         self.rect.y = player.rect.y + 80
         self.origin_image = self.image
         self.angle = 0

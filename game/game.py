@@ -34,8 +34,8 @@ class Game:
         self.stats = {
             'dinosaurs_killed': {'alanqa': 0, 'baryonyx': 0, 'carnotaurus': 0, 'oviraptor': 0, 'styracosaurus': 0},
             'damage_dealt': 0,
-            'damage_received': 0,
-            'comets_received': 0,
+            'comets_received': 0,  # Comètes touchées par le joueur
+            'comets_avoided': 0,  # Comètes esquivées
             'score': 0,
             'rounds_completed': 0
         }
@@ -128,12 +128,24 @@ class Game:
             self.player.all_projectiles.draw(screen)
             self.all_monsters.draw(screen)
 
+
+
             # Afficher le score
             score_text = self.font.render(f"Score: {self.score}", 1, (0, 0, 0))
             screen.blit(score_text, (20, 20))
 
+
+            # Afficher le nombre de manches
+            round_text = self.font.render(f"Manche: {self.stats['rounds_completed']}", 1, (0, 0, 0))
+            screen.blit(round_text, (screen.get_width() - round_text.get_width() - 20, 20))
+
             # Dessiner la barre de progression
             self.comet_event.update_bar(screen)
+
+            if not self.all_monsters and not self.comet_event.all_comets and not self.comet_event.fall_mode and not self.is_comet_event_active:
+                print("Conditions remplies pour un nouveau round.")
+                self.start_new_round()
+
 
 
 
@@ -141,8 +153,9 @@ class Game:
         return pygame.sprite.spritecollide(sprite, group, False, pygame.sprite.collide_mask)
 
     def spawn_monster(self, monster_class_name):
+        """Fait apparaître un monstre si les conditions sont remplies."""
         # Ne spawn pas de monstres si l'événement météorite est actif
-        if not self.is_comet_event_active and len(self.all_monsters) < 3:
+        if not self.is_comet_event_active and not self.comet_event.fall_mode and len(self.all_monsters) < 3:
             monster = monster_class_name(self)
             self.all_monsters.add(monster)
 
@@ -195,3 +208,82 @@ class Game:
             text = font.render(line, True, (255, 255, 255))
             screen.blit(text, (100, y))
             y += 30
+
+    def reset_game(self):
+        """Réinitialise complètement le jeu pour recommencer une nouvelle partie."""
+        self.is_playing = False
+        self.is_game_over = False
+        self.score = 0
+        self.difficulty_level = 1
+
+        # Réinitialiser les statistiques
+        self.stats = {
+            'dinosaurs_killed': {'alanqa': 0, 'baryonyx': 0, 'carnotaurus': 0, 'oviraptor': 0, 'styracosaurus': 0},
+            'damage_dealt': 0,
+            'comets_received': 0,
+            'comets_avoided': 0,  # Réinitialisation des comètes esquivées
+            'score': 0,
+            'rounds_completed': 0
+    }
+
+        # Vider tous les groupes de sprites
+        self.all_monsters.empty()
+        self.player.all_projectiles.empty()
+        self.comet_event.all_comets.empty()
+
+        # Réinitialiser la barre de progression des comètes
+        self.comet_event.reset_percent()
+        self.is_comet_event_active = False
+        self.comet_event.fall_mode = False  # Désactiver le mode chute
+        self.comet_event.comets_spawned = 0  # Réinitialiser le compteur des comètes générées
+        self.comet_event.last_spawn_time = pygame.time.get_ticks()  # Réinitialiser le timer de génération des comètes
+
+        # Réinitialiser le joueur
+        self.player.health = self.player.max_health
+        self.player.rect.x = 400
+        self.player.rect.y = self.player.ground_level
+
+        # Réinitialiser le timer de spawn des monstres
+        self.spawn_timer = pygame.time.get_ticks()
+
+        # Arrêter les sons actifs
+        self.sound_manager.stop('jurassicpark')
+        self.sound_manager.stop('game_over')
+
+
+    def start_new_round(self):
+        """Démarre une nouvelle manche et augmente la difficulté."""
+        self.stats['rounds_completed'] += 1
+        print(f"Manche {self.stats['rounds_completed']} démarrée!")
+
+        # Logs pour vérifier les paramètres avant modification
+        print(f"Avant : spawn_interval={self.spawn_interval}, cooldown_time={self.player.cooldown_time}, total_comets={self.comet_event.total_comets}")
+
+        # Réduire l'intervalle de spawn des monstres
+        self.spawn_interval = max(1000, self.spawn_interval - 200)
+
+        # Augmenter la difficulté des monstres
+        for monster in self.all_monsters:
+            monster.velocity += 0.2 * self.stats['rounds_completed']
+            monster.max_health += 10 * self.stats['rounds_completed']
+            monster.health = monster.max_health
+
+        # Augmenter la vitesse des comètes
+        for comet in self.comet_event.all_comets:
+            comet.velocity += 0.5 * self.stats['rounds_completed']
+
+        # Réduire la vitesse de progression de la barre de météorites
+        self.comet_event.percent_speed = max(1, self.comet_event.percent_speed - 1)
+
+        # Augmenter le nombre total de comètes pour la manche suivante
+        self.comet_event.total_comets += 2
+
+        # Réduire le cooldown du joueur
+        self.player.cooldown_time = max(100, self.player.cooldown_time - 50)
+
+        # Faire apparaître un nouveau monstre pour le début de la manche
+        self.spawn_monster(self.get_random_monster())
+
+        # Logs pour vérifier les paramètres après modification
+        print(f"Après : spawn_interval={self.spawn_interval}, cooldown_time={self.player.cooldown_time}, total_comets={self.comet_event.total_comets}")
+

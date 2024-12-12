@@ -23,6 +23,9 @@ class Player(animation.AnimateSprite):
         self.rect.y = self.ground_level
         self.last_shot_time = 0  # Temps du dernier tir
         self.cooldown_time = 600  # Temps de recharge en millisecondes (1 seconde)
+        self.is_moving = False  # pour indiquer le mouvement
+        self.default_orientation_right = True  # Orientation par défaut
+
 
     def damage(self, amount):
         self.health -= amount
@@ -31,7 +34,16 @@ class Player(animation.AnimateSprite):
 
 
     def update_animation(self):
-        self.animate()
+        """Met à jour l'animation du joueur."""
+        if self.is_moving:
+            self.animate(loop=True)  # Jouer l'animation si le joueur est en mouvement
+        else:
+            # Revenir à l'image de base si le joueur est statique
+            self.image = pygame.transform.scale(self.images[0], self.size)
+
+            # Assurer que le joueur est orienté vers la droite par défaut
+            if not self.default_orientation_right:
+                self.image = pygame.transform.flip(self.image, True, False)
 
     def update_health_bar(self, surface):
         # dessiner notre barre de vie
@@ -68,18 +80,30 @@ class Player(animation.AnimateSprite):
                 self.is_jumping = False
                 self.velocity_y = 0
 
-    def update(self):
-        self.apply_gravity()
-
     def move_right(self):
+        """Déplacer le joueur vers la droite."""
+        self.is_moving = True
+        self.default_orientation_right = True  # Définir l'orientation par défaut vers la droite
         if not self.game.check_collision(self, self.game.all_monsters):
             self.rect.x += self.velocity
             if self.flipped:
-                self.flip_images()  
+                self.flip_images()
                 self.flipped = False
 
     def move_left(self):
+        """Déplacer le joueur vers la gauche."""
+        self.is_moving = True
+        self.default_orientation_right = False  # Définir l'orientation par défaut vers la gauche
         self.rect.x -= self.velocity
         if not self.flipped:
-            self.flip_images() 
+            self.flip_images()
             self.flipped = True
+
+    def stop_moving(self):
+        """Arrêter le mouvement."""
+        self.is_moving = False
+
+    def update(self):
+        """Met à jour le joueur, y compris la gravité et l'animation."""
+        self.apply_gravity()
+        self.update_animation()
