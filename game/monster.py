@@ -6,18 +6,17 @@ import animation
 # creer une classe qui va gérer la notion de monstre sur notre jeu
 class Monster(animation.AnimateSprite):
 
-    def __init__(self, game, name, size, offset=0):
-        super().__init__(name, size)
+    def __init__(self, game, name, size=(50, 50), loot_amount=10):
+        super().__init__(name, size=size)  # Appeler le constructeur d'AnimateSprite
         self.game = game
         self.health = 100
         self.max_health = 100
-        self.attack = 0.1
+        self.attack = 10
+        self.velocity = 1
+        self.loot_amount = loot_amount  # Montant du loot
         self.rect = self.image.get_rect()
-        self.rect.x = 1000 + random.randint(50, 300)  # Commence hors de l'écran à droite
-        self.rect.y = 540 - offset  # Position verticale (au niveau du sol par défaut)
-        self.loot_amount = 10
-        self.velocity = random.randint(1, 3)  # Vitesse aléatoire
-        self.start_animations()
+        self.rect.x = 1000 + random.randint(0, 300)
+        self.rect.y = 400  # Garder une position constante
 
 
     def set_speed(self, speed):
@@ -58,12 +57,18 @@ class Monster(animation.AnimateSprite):
 
 
     def forward(self):
-    # Le déplacement se fait uniquement s'il n'y a pas de collision avec le joueur
-     if not self.game.check_collision(self, self.game.all_players):
-        self.rect.x -= self.velocity  # Déplacer vers la gauche
-     else:
-        # Si collision avec le joueur, infliger des dégâts
-        self.game.player.damage(self.attack)
+        # Le déplacement se fait uniquement s'il n'y a pas de collision avec le joueur
+        if not self.game.check_collision(self, self.game.all_players):
+            self.rect.x -= self.velocity  # Déplacer vers la gauche
+
+            # Si le monstre sort de l'écran, le supprimer
+            if self.rect.right < 0:
+                print(f"Le monstre {self.__class__.__name__} est sorti de l'écran et est supprimé.")
+                self.game.all_monsters.remove(self)
+        else:
+            # Si collision avec le joueur, infliger des dégâts
+            self.game.player.damage(self.attack)
+
 
 
 
@@ -75,6 +80,7 @@ class Alanqa(Monster):
         super().__init__(game, "alanqa", (130, 130))
         self.set_speed(2)
         self.set_loot_amount(20)
+        self.rect.y = 550  # Ajustement pour descendre Alanqa
 
 # definir une classe pour le Baryonyx
 class Baryonyx(Monster):

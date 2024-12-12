@@ -20,6 +20,7 @@ class Game:
         self.all_players.add(self.player)
         # generer l'evenement
         self.comet_event = CometFallEvent(self)
+        self.comet_event.percent_speed = 10 # Par exemple, augmenter la vitesse à 10%        
         # groupe de monstres
         self.all_monsters = pygame.sprite.Group()
         # gerer le son
@@ -29,19 +30,14 @@ class Game:
         self.score = 0
         self.pressed = {}
 
-
-
     def start(self):
         self.is_playing = True
         self.monsters_killed = 0  # Réinitialiser le compteur
         self.spawn_timer = pygame.time.get_ticks()  # Initialiser le timer
         self.spawn_monster(self.get_random_monster())  # Faire apparaître le premier monstre
 
-        
-
     def add_score(self, points=10):
         self.score += points
-
 
     def game_over(self):
         # Remettre le jeu à neuf
@@ -57,67 +53,52 @@ class Game:
         # Jouer le son
         self.sound_manager.play("game_over")
 
-
     def update(self, screen):
         if self.is_playing:
-            current_time = pygame.time.get_ticks()
+            # Gestion des comètes
+            if self.comet_event.fall_mode:
+                self.comet_event.update_comets()
 
-            # Ne pas spawner de monstres si l'événement météorite est actif ou si la barre est pleine
-            if not self.is_comet_event_active and not self.comet_event.is_full_loaded() and len(self.all_monsters) < 3 and current_time - self.spawn_timer >= self.spawn_interval:
-                self.spawn_timer = current_time
-                self.spawn_monster(self.get_random_monster())
-            elif self.is_comet_event_active or self.comet_event.is_full_loaded():
-                print("Le spawn est bloqué : événement météorite actif ou barre pleine.")
-                
-        for comet in self.comet_event.all_comets:
-            comet.fall()
+            # Dessiner les comètes
+            self.comet_event.all_comets.draw(screen)
 
-        # Appeler la méthode de mise à jour des comètes
-        if self.comet_event.fall_mode:
-            self.comet_event.update_comets()  # Générer les comètes progressivement
+            # Mise à jour du joueur
+            self.player.update()  # Met à jour la gravité
+            screen.blit(self.player.image, self.player.rect)
+            self.player.update_health_bar(screen)
+            self.player.update_animation()
 
+            # Gestion des mouvements
+            if self.pressed.get(pygame.K_RIGHT) and self.player.rect.x + self.player.rect.width < screen.get_width():
+                self.player.move_right()
+            elif self.pressed.get(pygame.K_LEFT) and self.player.rect.x > 0:
+                self.player.move_left()
 
+            # Mise à jour des projectiles
+            for projectile in self.player.all_projectiles:
+                projectile.move()
 
+            # Mise à jour des monstres
+            for monster in self.all_monsters:
+                monster.forward()
+                monster.update_health_bar(screen)
+                monster.update_animation()
 
+            # Dessiner les projectiles et monstres
+            self.player.all_projectiles.draw(screen)
+            self.all_monsters.draw(screen)
 
+            # Afficher le score
+            score_text = self.font.render(f"Score: {self.score}", 1, (0, 0, 0))
+            screen.blit(score_text, (20, 20))
 
-    # Reste de la méthode...
+            # Dessiner la barre de progression
+            self.comet_event.update_bar(screen)
 
-
-        # autres mises à jour...
-        score_text = self.font.render(f"Score: {self.score}", 1, (0, 0, 0))
-        screen.blit(score_text, (20, 20))
-
-        screen.blit(self.player.image, self.player.rect)
-        self.player.update_health_bar(screen)
-        self.comet_event.update_bar(screen)
-        self.player.update_animation()
-        self.player.update()
-
-        for projectile in self.player.all_projectiles:
-            projectile.move()
-
-        for monster in self.all_monsters:
-            monster.forward()
-            monster.update_health_bar(screen)
-            monster.update_animation()
-
-        for comet in self.comet_event.all_comets:
-            comet.fall()
-
-        self.player.all_projectiles.draw(screen)
-        self.all_monsters.draw(screen)
-        self.comet_event.all_comets.draw(screen)
-
-        if self.pressed.get(pygame.K_RIGHT) and self.player.rect.x + self.player.rect.width < screen.get_width():
-            self.player.move_right()
-        elif self.pressed.get(pygame.K_LEFT) and self.player.rect.x > 0:
-            self.player.move_left()
 
 
     def check_collision(self, sprite, group):
         return pygame.sprite.spritecollide(sprite, group, False, pygame.sprite.collide_mask)
-
 
     def spawn_monster(self, monster_class_name):
         # Ne spawn pas de monstres si l'événement météorite est actif
@@ -125,12 +106,6 @@ class Game:
             monster = monster_class_name(self)
             self.all_monsters.add(monster)
 
-
-
-
-
-
-        
     def get_random_monster(self):
         import random
         return random.choice([Alanqa, Baryonyx, Carnotaurus, Oviraptor, Styracosaurus])

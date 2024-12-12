@@ -67,6 +67,12 @@ class Player(animation.AnimateSprite):
     def move_right(self):
         if not self.game.check_collision(self, self.game.all_monsters):
             self.rect.x += self.velocity
+            if self.flipped:
+                self.flip_images()  
+                self.flipped = False
 
     def move_left(self):
         self.rect.x -= self.velocity
+        if not self.flipped:
+            self.flip_images() 
+            self.flipped = True
