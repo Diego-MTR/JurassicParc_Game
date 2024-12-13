@@ -33,13 +33,6 @@ class Comet(pygame.sprite.Sprite):
 
 
 
-        if self.rect.y >= 550:
-            print(f"Comète au sol à x={self.rect.x}, y={self.rect.y}")
-            self.comet_event.game.stats['comets_avoided'] += 1  # Comptabiliser comme esquivée
-            self.remove()
-
-
-
         # Si la comète touche le joueur
         if self.comet_event.game.check_collision(self, self.comet_event.game.all_players):
             print(f"Comète a touché le joueur à x={self.rect.x}, y={self.rect.y}")

@@ -248,20 +248,24 @@ while running:
             # Clic sur le bouton Exit depuis l'écran de défaite
             elif game.is_game_over and exit_button_rect and exit_button_rect.collidepoint(event.pos):
                 running = False
+                sound_manager.play('click')
                 pygame.quit()
             # Clic sur le bouton Exit depuis l'écran principal (fermer le jeu)
             elif first_time and exit_button_rect.collidepoint(event.pos):
                 running = False
+                sound_manager.play('click')
                 pygame.quit()
 
             # Clic sur le bouton Exit depuis l'écran des règles (retourner à l'écran principal)
             elif show_rules and exit_button_rect.collidepoint(event.pos):
                 show_rules = False
+                sound_manager.play('click')
                 first_time = True
 
             # Clic sur le bouton Rules depuis l'écran principal (ouvrir l'écran des règles)
             elif first_time and rules_button_rect.collidepoint(event.pos):
                 first_time = False
+                sound_manager.play('click')
                 show_rules = True
 
         # Afficher l'écran des règles si actif
