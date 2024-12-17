@@ -8,14 +8,14 @@ from sounds import SoundManager
 # creer une seconde classe qui va representer notre jeu
 class Game:
 
-    def __init__(self):
+    def __init__(self, starting_round=4):
         # definir si notre jeu à commencé ou non
         self.is_playing = False
         self.spawn_timer = 0  # Ajout d'un timer pour gérer les spawns
         self.spawn_interval = 3000  # Intervalle en millisecondes entre chaque spawn
         self.is_comet_event_active = False
         self.difficulty_level = 1  # Niveau de difficulté initial
- 
+        self.health_packs = pygame.sprite.Group() # Pack de soins
         # generer notre joueur
         self.all_players = pygame.sprite.Group()
         self.player = Player(self)
@@ -37,7 +37,7 @@ class Game:
             'comets_received': 0,  # Comètes touchées par le joueur
             'comets_avoided': 0,  # Comètes esquivées
             'score': 0,
-            'rounds_completed': 0
+            'rounds_completed': starting_round  
         }
         
         
@@ -147,6 +147,9 @@ class Game:
                 self.start_new_round()
 
 
+            for health_pack in self.health_packs:
+                health_pack.fall()
+            self.health_packs.draw(screen)
 
 
     def check_collision(self, sprite, group):

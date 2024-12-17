@@ -1,6 +1,8 @@
 import pygame
 from comet import Comet
 import random
+from health import HealthPack  # Importer la classe HealthPack
+
 
 class CometFallEvent:
 
@@ -46,6 +48,7 @@ class CometFallEvent:
 
         current_time = pygame.time.get_ticks()
         spawn_interval = 2000  # Intervalle de génération des comètes en millisecondes
+        
 
         # Générer une nouvelle comète si le temps est écoulé
         if current_time - self.last_spawn_time > spawn_interval and self.comets_spawned < self.total_comets:
@@ -65,6 +68,23 @@ class CometFallEvent:
         # Terminer l'événement si toutes les comètes sont tombées
         if self.comets_spawned >= self.total_comets and len(self.all_comets) == 0:
             self.reset_event()
+
+        # Ajouter une trousse de soins pendant l'évènement toutes les 5 manches
+        if self.game.stats['rounds_completed'] % 5 == 0 and not hasattr(self, 'health_pack_added'):
+            self.health_pack = HealthPack(self.game)
+            self.game.health_packs.add(self.health_pack)
+            self.health_pack_added = True  # Ajouter seulement une fois par événement
+
+        # Si l'événement se termine, réinitialiser la trousse
+        if self.comets_spawned >= self.total_comets and len(self.all_comets) == 0:
+            self.health_pack_added = False  # Réinitialiser pour la prochaine manche
+            
+            # Ajouter une trousse de soin toutes les 5 manches
+        if self.game.stats['rounds_completed'] % 5 == 0 and not hasattr(self, 'health_pack_added'):
+            health_pack = HealthPack(self.game)
+            health_pack.rect.x = random.randint(20, 800)  # Position aléatoire sur x
+            self.all_comets.add(health_pack)  # Ajouter au même groupe que les comètes
+            self.health_pack_added = True
 
 
     def reset_event(self):

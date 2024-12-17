@@ -14,8 +14,8 @@ def display_defeat_screen(screen, game):
     banner_defeat = pygame.image.load("Assets/defeat.png")
     banner_defeat = pygame.transform.scale(banner_defeat, (400, 300))
 
-
-
+    # Initialisation du jeu avec une manche de départ
+    game = Game(starting_round=4)  # Mettre à 4 pour tester rapidement
 
     # Position de la bannière
     banner_width, banner_height = banner_defeat.get_size()

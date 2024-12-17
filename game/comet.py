@@ -1,5 +1,6 @@
 import pygame
 import random
+from sounds import SoundManager
 
 # creer une classe pour gérer cette comete
 class Comet(pygame.sprite.Sprite):
@@ -22,23 +23,20 @@ class Comet(pygame.sprite.Sprite):
         self.rect.y += self.velocity
         if self.rect.y >= 550:
             print(f"Comète touchée le sol à x={self.rect.x}, y={self.rect.y}")
+            # Jouer le son
+            self.comet_event.game.sound_manager.play('meteorite')
             self.comet_event.game.stats['comets_avoided'] += 1
             self.remove()
-
-        if self.comet_event.game.check_collision(self, self.comet_event.game.all_players):
-            print(f"Comète touchée le joueur à x={self.rect.x}, y={self.rect.y}")
-            self.comet_event.game.stats['comets_received'] += 1
-            self.remove()
-            self.comet_event.game.player.damage(20)
-
 
 
         # Si la comète touche le joueur
         if self.comet_event.game.check_collision(self, self.comet_event.game.all_players):
             print(f"Comète a touché le joueur à x={self.rect.x}, y={self.rect.y}")
+            # Jouer le son
+            self.comet_event.game.sound_manager.play('meteorite')
             self.comet_event.game.stats['comets_received'] += 1  # Comptabiliser comme touchée
             self.remove()
-            self.comet_event.game.player.damage(20)
+            self.comet_event.game.player.damage(15)
 
         print(f"Comète en chute : x={self.rect.x}, y={self.rect.y}")
 
@@ -49,6 +47,6 @@ class Comet(pygame.sprite.Sprite):
 
     def update_velocity(self):
         """Ajuste la vitesse en fonction de la manche actuelle."""
-        base_velocity = 1  # Vitesse minimale
+        base_velocity = 2  # Vitesse minimale
         increment = 0.2 * self.comet_event.game.stats['rounds_completed']  # Augmentation progressive
         self.velocity = random.randint(int(base_velocity + increment), int(base_velocity + increment + 2))

@@ -13,7 +13,7 @@ class Player(animation.AnimateSprite):
         self.attack = 30
         self.velocity = 3
         self.jump_velocity = 20  # Puissance du saut
-        self.gravity = 2  # Gravité appliquée
+        self.gravity = 2 # Gravité appliquée
         self.is_jumping = False
         self.velocity_y = 0  # Vitesse verticale
         self.ground_level = 500  # Niveau du sol
@@ -22,7 +22,7 @@ class Player(animation.AnimateSprite):
         self.rect.x = 400
         self.rect.y = self.ground_level
         self.last_shot_time = 0  # Temps du dernier tir
-        self.cooldown_time = 600  # Temps de recharge en millisecondes (1 seconde)
+        self.cooldown_time = 750  # Temps de recharge en millisecondes
         self.is_moving = False  # pour indiquer le mouvement
         self.default_orientation_right = True  # Orientation par défaut
 
@@ -54,9 +54,15 @@ class Player(animation.AnimateSprite):
         current_time = pygame.time.get_ticks()  # Temps actuel en millisecondes
         if current_time - self.last_shot_time >= self.cooldown_time:
             # Créer une nouvelle instance de la classe projectile
-            self.all_projectiles.add(Projectile(self))
-            # Démarrer l'animation du lancer
+            self.default_orientation_right = True  # Forcer l'orientation vers la droite
+            if self.flipped:  # Réinitialiser l'image si elle était inversée
+                self.flip_images()
+                self.flipped = False
+
+            self.image = pygame.transform.scale(self.images[0], self.size)  # Forcer l'image 1
+            self.all_projectiles.add(Projectile(self))  # Lancer le projectile
             self.start_animations()
+
             # Jouer le son
             self.game.sound_manager.play('tir')
             # Enregistrer le temps du tir
