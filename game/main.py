@@ -1,7 +1,74 @@
+import json
 import pygame
 import math
 from game import Game
 pygame.init()
+pygame.mixer.init()  # Initialiser le mixer pour les sons
+
+
+
+def get_player_name(screen):
+    """Affiche un écran pour saisir le pseudo avec un style amélioré."""
+    # Charger le background bg_dark
+    bg_dark = pygame.image.load("Assets/bg_dark.jpg")
+    bg_dark = pygame.transform.scale(bg_dark, screen.get_size())  # Adapter la taille du fond à l'écran
+
+    # Définir les polices et styles
+    font_title = pygame.font.Font("Assets/my_custom_font.ttf", 48)  # Police pour le titre
+    font_input = pygame.font.Font("Assets/my_custom_font.ttf", 36)  # Police pour l'entrée
+    input_box = pygame.Rect(340, 360, 400, 50)  # Taille et position de la boîte de texte centrée
+    color_inactive = pygame.Color('gray')
+    color_active = pygame.Color('white')
+    color = color_inactive
+    active = False
+    text = ''
+    done = False
+
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return None
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                # Activer ou désactiver le champ si clic
+                if input_box.collidepoint(event.pos):
+                    active = not active
+                else:
+                    active = False
+                color = color_active if active else color_inactive
+            elif event.type == pygame.KEYDOWN and active:
+                if event.key == pygame.K_RETURN:
+                    done = True
+                elif event.key == pygame.K_BACKSPACE:
+                    text = text[:-1]
+                else:
+                    text += event.unicode
+
+        # Afficher le fond
+        screen.blit(bg_dark, (0, 0))
+
+        # Afficher le titre légèrement plus en hauteur
+        title_surface = font_title.render("Entrez votre pseudo :", True, (255, 255, 255))
+        title_rect = title_surface.get_rect(center=(screen.get_width() // 2, 250))
+        screen.blit(title_surface, title_rect)
+
+        # Afficher le texte tapé, légèrement plus haut pour le centrer dans la boîte
+        input_txt_surface = font_input.render(text, True, (255, 255, 255))  # Texte en blanc
+        screen.blit(input_txt_surface, (input_box.x + 5, input_box.y + 5 - 10))  # Décalage vertical de -10
+
+        # Dessiner la boîte de saisie
+        pygame.draw.rect(screen, color, input_box, 2)  # Bordure de la boîte
+
+        # Instructions pour valider
+        instructions_surface = font_input.render("Appuyez sur Entrée pour valider", True, (200, 200, 200))
+        instructions_rect = instructions_surface.get_rect(center=(screen.get_width() // 2, 450))
+        screen.blit(instructions_surface, instructions_rect)
+
+        pygame.display.flip()
+
+    return text
+
+
 
 def display_defeat_screen(screen, game):
     """Affiche l'écran de défaite avec un tableau centralisé et un bouton Retry fonctionnel."""
@@ -13,9 +80,6 @@ def display_defeat_screen(screen, game):
     # Charger les ressources localement
     banner_defeat = pygame.image.load("Assets/defeat.png")
     banner_defeat = pygame.transform.scale(banner_defeat, (400, 300))
-
-    # Initialisation du jeu avec une manche de départ
-    game = Game(starting_round=4)  # Mettre à 4 pour tester rapidement
 
     # Position de la bannière
     banner_width, banner_height = banner_defeat.get_size()
@@ -125,6 +189,61 @@ def display_rules_screen(screen):
 
     return exit_button_rect
 
+
+def display_top_scores(screen):
+    """Affiche les meilleurs scores avec un fond sombre et un bouton Exit."""
+    bg_dark = pygame.image.load("Assets/bg_dark.jpg")
+    bg_dark = pygame.transform.scale(bg_dark, screen.get_size())
+
+    font = pygame.font.Font("Assets/my_custom_font.ttf", 24)
+
+    # Charger les scores
+    try:
+        with open("top_scores.json", "r") as file:
+            scores = json.load(file)
+    except FileNotFoundError:
+        scores = []
+
+    waiting = True
+    while waiting:
+        screen.blit(bg_dark, (0, 0))
+
+        # Afficher le titre des scores
+        title_surface = font.render("Top Scores", True, (255, 255, 255))
+        screen.blit(title_surface, ((screen.get_width() - title_surface.get_width()) // 2, 50))
+
+        # Afficher les scores
+        y = 120
+        for entry in scores[:10]:  # Limiter à 10 scores
+            score_surface = font.render(f"{entry['pseudo']} - {entry['score']}", True, (255, 255, 255))
+            screen.blit(score_surface, ((screen.get_width() - score_surface.get_width()) // 2, y))
+            y += 30
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and exit_button_rect.collidepoint(event.pos):
+                waiting = False
+                return "defeat" if show_scores_from_defeat else "menu"
+            
+    # Bouton "Exit"
+        exit_button = pygame.image.load("Assets/exit.png")
+        exit_button = pygame.transform.scale(exit_button, (250, 250))  # Taille ajustée
+        screen.blit(exit_button, exit_button_rect)
+
+        return exit_button_rect
+
+
+
+
+
+
+                
+
+
 # définir une clock
 clock = pygame.time.Clock()
 FPS = 60
@@ -155,8 +274,9 @@ play_button_retry = pygame.transform.scale(play_button_retry, (250, 250))
 
 # Bouton Exit
 exit_button = pygame.image.load("Assets/exit.png")
-exit_button = pygame.transform.scale(exit_button, (250, 250))  # Ajustez la taille selon vos besoins
-exit_button_rect = exit_button.get_rect()
+exit_button = pygame.transform.scale(exit_button, (250, 250))  # Taille ajustée
+exit_button_rect = exit_button.get_rect(topleft=(20, 20))  # Position en haut à gauche
+
 
 # Charger le bouton "Rules"
 rules_button = pygame.image.load("Assets/rules.png")
@@ -166,6 +286,15 @@ rules_button_rect = rules_button.get_rect()
 # Positionner en haut à droite
 rules_button_rect.x = screen.get_width() - rules_button_rect.width - 20
 rules_button_rect.y = 20
+
+# Charger le bouton "Scores"
+
+top_scores_button = pygame.image.load('Assets/top_scores.png')
+top_scores_button = pygame.transform.scale(top_scores_button, (250, 250))
+top_scores_rect = top_scores_button.get_rect()
+top_scores_rect.x = screen.get_width() - top_scores_rect.width - 20
+top_scores_rect.y = screen.get_height() - top_scores_rect.height - 20
+
 
 
 exit_x = ()
@@ -192,7 +321,9 @@ first_time = True
 
 running = True
 show_rules = False  # Initialiser l'état de l'écran des règles
-first_time = True   # Initialiser l'état de l'écran principal
+show_scores = False
+show_scores_from_defeat = False
+
 
 # boucle principale
 while running:
@@ -204,20 +335,39 @@ while running:
     elif show_rules:
         # Afficher l'écran des règles
         exit_button_rect = display_rules_screen(screen)
+        screen.blit(exit_button, exit_button_rect)
+    elif show_scores:
+        result = display_top_scores(screen)
+        if result == "menu":
+            show_scores = False
+            first_time = True
+        elif result == "defeat":
+            show_scores = False
+            game.is_game_over = True
+
+        
     else:
         if first_time:
             # Afficher l'écran de démarrage
-            screen.blit(banner_start, banner_rect)
-            screen.blit(play_button_start, play_button_rect)
-            screen.blit(exit_button, exit_button_rect)  # Afficher le bouton Exit
+            screen.blit(banner_start, banner_rect)  
+            screen.blit(exit_button, exit_button_rect)
             screen.blit(rules_button, rules_button_rect)
+            screen.blit(top_scores_button, top_scores_rect)
+            screen.blit(play_button_start, play_button_rect)
 
+                    
+        elif first_time and play_button_rect.collidepoint(event.pos):
+            first_time = False
+            sound_manager.play('click')
+            sound_manager.stop('welcome')
+
+            
         elif game.is_game_over:
-            # Afficher le fond sombre pour l'écran de défaite
             screen.blit(bg_dark, (0, 0))
-            screen.blit(exit_button, exit_button_rect)  # Afficher le bouton Exit
-            # Afficher les autres éléments (tableau de scores, bouton Retry, etc.)
+            screen.blit(exit_button, exit_button_rect)  # Ajouter le bouton Exit
+            screen.blit(top_scores_button, top_scores_rect)  # Ajouter le bouton Scores
             retry_button_rect = display_defeat_screen(screen, game)
+
 
 
     pygame.display.flip()
@@ -234,22 +384,19 @@ while running:
             if first_time and play_button_rect.collidepoint(event.pos):
                 first_time = False
                 screen.blit(exit_button, exit_button_rect)  # Afficher le bouton Exit
-                game.start()
                 sound_manager.play('click')
                 sound_manager.stop('welcome')
+                
+                # Demander le pseudo avant de démarrer
+                player_name = get_player_name(screen)
+                if player_name:
+                    game = Game()
+                    game.player_name = player_name  # Enregistrer le pseudo dans Game
+                    game.start()
+                    first_time = False
 
-            # Clic sur le bouton Retry depuis l'écran de défaite
-            elif game.is_game_over and retry_button_rect and retry_button_rect.collidepoint(event.pos):
-                game.reset_game()
-                game.start()  # Redémarrer une nouvelle partie directement
-                sound_manager.play('click')
-                screen.blit(exit_button, exit_button_rect)  # Afficher le bouton Exit
+                
 
-            # Clic sur le bouton Exit depuis l'écran de défaite
-            elif game.is_game_over and exit_button_rect and exit_button_rect.collidepoint(event.pos):
-                running = False
-                sound_manager.play('click')
-                pygame.quit()
             # Clic sur le bouton Exit depuis l'écran principal (fermer le jeu)
             elif first_time and exit_button_rect.collidepoint(event.pos):
                 running = False
@@ -262,15 +409,72 @@ while running:
                 sound_manager.play('click')
                 first_time = True
 
+            # Clic sur le bouton Exit depuis l'écran des scores (retourner à l'écran principal)
+            elif show_scores and exit_button_rect.collidepoint(event.pos):
+                show_scores = False
+                sound_manager.play('click')
+                first_time = True
+
+            # Clic sur le bouton Exit depuis l'écran de défaite
+            elif game.is_game_over and exit_button_rect and exit_button_rect.collidepoint(event.pos):
+                running = False
+                sound_manager.play('click')
+                pygame.quit()
+
+            # Clic sur le bouton Retry depuis l'écran de défaite
+            elif game.is_game_over and retry_button_rect and retry_button_rect.collidepoint(event.pos):
+                game.reset_game()
+                # Demander le pseudo avant de démarrer
+                player_name = get_player_name(screen)
+                if player_name:
+                    game = Game()
+                    game.player_name = player_name  # Enregistrer le pseudo dans Game
+                    game.start()
+                    first_time = False
+                game.start()  # Redémarrer une nouvelle partie directement
+                sound_manager.play('click')
+                screen.blit(exit_button, exit_button_rect)  # Afficher le bouton Exit
+
             # Clic sur le bouton Rules depuis l'écran principal (ouvrir l'écran des règles)
             elif first_time and rules_button_rect.collidepoint(event.pos):
                 first_time = False
                 sound_manager.play('click')
                 show_rules = True
+                
+                # Clic sur le bouton Scores depuis l'écran principal (ouvrir l'écran des règles)
+            elif first_time and top_scores_rect.collidepoint(event.pos):
+                first_time = False
+                sound_manager.play('click')
+                show_scores = True
+                show_scores_from_defeat = False  # Défini comme false car depuis l'écran principal
+
+
+                # Clic sur le bouton Exit depuis l'écran des scores (retourner à l'écran principal)
+            elif show_scores and exit_button_rect.collidepoint(event.pos):
+                show_scores = False
+                sound_manager.play('click')
+                first_time = True
+
+            # Clic sur le bouton Retry depuis l'écran de défaite
+            elif game.is_game_over and retry_button_rect and retry_button_rect.collidepoint(event.pos):
+                sound_manager.play('click')
+                game.display_top_scores(screen)  # Afficher le tableau des scores
+                screen.blit(exit_button, exit_button_rect)  # Afficher le bouton Exit
+
+            # Clic sur le bouton Scores depuis l'écran de défaite
+            elif game.is_game_over and top_scores_rect.collidepoint(event.pos):
+                sound_manager.play('click')
+                show_scores = True  # Passer à l’écran des scores
+                show_scores_from_defeat = True
+
+
 
         # Afficher l'écran des règles si actif
         if show_rules:
             exit_button_rect = display_rules_screen(screen)
+
+        if show_scores:
+            exit_button_rect = display_top_scores(screen)
 
         elif event.type == pygame.KEYDOWN:
             game.pressed[event.key] = True

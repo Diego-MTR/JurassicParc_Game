@@ -1,5 +1,6 @@
 import pygame
 import random
+from sounds import SoundManager
 
 class HealthPack(pygame.sprite.Sprite):
     def __init__(self, game):
@@ -19,6 +20,7 @@ class HealthPack(pygame.sprite.Sprite):
         # Vérifier la collision avec le joueur
         if self.game.check_collision(self, self.game.all_players):
             print("Trousse de soin ramassée !")
+            self.game.sound_manager.play('health')  # Jouer le son
             self.game.player.health = self.game.player.max_health  # Redonner la vie max
             self.remove()
 

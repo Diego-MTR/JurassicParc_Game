@@ -9,6 +9,7 @@ class SoundManager:
             'jurassicpark': pygame.mixer.Sound("Assets/sounds/jurassicpark.ogg"),
             'welcome': pygame.mixer.Sound("Assets/sounds/Welcome.ogg"),  # Ajouter la musique d'accueil
             'meteorite': pygame.mixer.Sound("Assets/sounds/meteorite.ogg"),
+            'health': pygame.mixer.Sound("Assets/sounds/health.ogg"),
         }
 
     def play(self, name):

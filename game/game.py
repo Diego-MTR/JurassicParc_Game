@@ -3,6 +3,8 @@ from player import Player
 from monster import Monster, Alanqa, Baryonyx, Carnotaurus, Oviraptor, Styracosaurus
 from comet_event import CometFallEvent
 from sounds import SoundManager
+import json
+
 
 
 # creer une seconde classe qui va representer notre jeu
@@ -10,6 +12,7 @@ class Game:
 
     def __init__(self, starting_round=4):
         # definir si notre jeu à commencé ou non
+        self.is_game_over = False
         self.is_playing = False
         self.spawn_timer = 0  # Ajout d'un timer pour gérer les spawns
         self.spawn_interval = 3000  # Intervalle en millisecondes entre chaque spawn
@@ -51,6 +54,45 @@ class Game:
         self.retry_rect = self.retry_button.get_rect(center=(540, 400))
 
 
+    def save_score(self, player_name):
+            """Sauvegarde le score du joueur dans un fichier."""
+            score_data = {'pseudo': player_name, 'score': self.score}
+            try:
+                with open("top_scores.json", "r") as file:
+                    scores = json.load(file)
+            except FileNotFoundError:
+                scores = []
+
+            scores.append(score_data)
+
+            # Trier les scores par ordre décroissant
+            scores = sorted(scores, key=lambda x: x['score'], reverse=True)
+
+            with open("top_scores.json", "w") as file:
+                json.dump(scores, file, indent=4)
+
+    def display_top_scores(self, screen):
+            """Affiche le tableau des meilleurs scores."""
+            font = pygame.font.Font("Assets/my_custom_font.ttf", 24)
+            try:
+                with open("top_scores.json", "r") as file:
+                    scores = json.load(file)
+            except FileNotFoundError:
+                scores = []
+
+            screen.fill((0, 0, 0))
+            y = 100
+            screen.blit(font.render("Top Scores", True, (255, 255, 255)), (400, 50))
+
+            for entry in scores[:10]:
+                text = f"{entry['pseudo']} - {entry['score']}"
+                screen.blit(font.render(text, True, (255, 255, 255)), (400, y))
+                y += 30
+
+            pygame.display.flip()
+            pygame.time.wait(5000)  # Affiche pendant 5 secondes
+            
+
     def start(self):
         self.is_playing = True
         self.monsters_killed = 0  # Réinitialiser le compteur
@@ -78,8 +120,13 @@ class Game:
         self.player.health = self.player.max_health
         self.comet_event.reset_percent()
         self.is_comet_event_active = False
-        self.sound_manager.play("game_over")
         self.sound_manager.sounds['jurassicpark'].stop()
+        self.sound_manager.play("game_over")
+        # Sauvegarder le score si le pseudo existe
+        if hasattr(self, 'player_name'):
+            self.save_score(self.player_name)
+        else:
+            print("Erreur : Aucun pseudo n'a été défini pour le joueur.")
         
 
 
